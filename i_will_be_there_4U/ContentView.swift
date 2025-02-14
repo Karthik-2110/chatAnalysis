@@ -17,7 +17,7 @@ struct ContentView: View {
     @State private var errorMessage: String? = nil
 
     var body: some View {
-        VStack(spacing: 22) {
+        VStack(spacing: 20) {
             Text(fileName)
                 .font(.headline)
                 .padding(.top)
@@ -204,7 +204,7 @@ extension ContentView {
             // Split into smaller chunks if needed
             let subChunks = splitTextIntoChunks(text: chunk, maxChunkSize: 30000)
             
-            progressCallback("Processing chunk \(index + 1)/\(textChunks.count)...")
+            progressCallback("Reading the converstions \(index + 1)/\(textChunks.count)...")
             for (subIndex, subChunk) in subChunks.enumerated() {
                 if subIndex > 0 {
                     try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second delay
