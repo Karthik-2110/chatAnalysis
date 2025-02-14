@@ -19,11 +19,12 @@ struct ContentView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
+                Spacer()
                 // Header
                 VStack(spacing: 8) {
                     Image(systemName: "heart")
                         .resizable()
-                        .frame(width: 40, height: 40)
+                        .frame(width: 32, height: 32)
                         .foregroundColor(.green)
                     
                     Text("Chat analyser")
@@ -33,7 +34,7 @@ struct ContentView: View {
                         .font(.system(size: 16))
                         .foregroundColor(.secondary)
                 }
-                .padding(.top, 20)
+                .padding(.top, 100)
                 
                 // Instructions
                 VStack(alignment: .leading, spacing: 12) {
@@ -48,27 +49,34 @@ struct ContentView: View {
                 .cornerRadius(12)
                 .padding(.horizontal)
                 
-                // File Status
+                // File Status and Upload
                 if !fileContent.isEmpty {
                     VStack(spacing: 4) {
-                        Text(fileName)
-                            .font(.headline)
+                        HStack(spacing: 4) {
+                            Text(fileName)
+                                .font(.headline)
+                            Button(action: {
+                                isFilePickerPresented = true
+                            }) {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .foregroundColor(.green)
+                                    .font(.system(size: 16))
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
                         
-                        Text("File loaded successfully!")
+                        Text("Chat uploaded successfully!")
                             .foregroundColor(.green)
                             .font(.subheadline)
                     }
                     .padding(.vertical, 8)
-                }
-                
-                // Action Buttons
-                VStack(spacing: 12) {
+                } else {
                     Button(action: {
                         isFilePickerPresented = true
                     }) {
                         HStack {
                             Image(systemName: "square.and.arrow.up.fill")
-                            Text(fileContent.isEmpty ? "Upload Chat" : "Change File")
+                            Text("Upload Chat")
                         }
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.white)
@@ -77,26 +85,26 @@ struct ContentView: View {
                     }
                     .background(Color.green)
                     .cornerRadius(25)
-                    
-                    if !fileContent.isEmpty {
-                        Button(action: {
-                            processWithGemini()
-                        }) {
-                            HStack {
-                                Image(systemName: "wand.and.stars")
-                                Text("Create Memory")
-                            }
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                        }
-                        .background(isProcessing ? Color.gray : Color.blue)
-                        .cornerRadius(25)
-                        .disabled(isProcessing)
-                    }
                 }
-                .padding(.horizontal)
+                
+                // Create Memory Button
+                if !fileContent.isEmpty {
+                    Button(action: {
+                        processWithGemini()
+                    }) {
+                        HStack {
+                            Image(systemName: "wand.and.stars")
+                            Text("Create Memory")
+                        }
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                    }
+                    .background(Color.green)
+                    .cornerRadius(25)
+                    .disabled(isProcessing)
+                }
                 
                 // Processing Status
                 if isProcessing {
@@ -138,8 +146,11 @@ struct ContentView: View {
                 }
                 
                 Spacer(minLength: 40)
+                Spacer()
             }
-            .padding()
+            .padding(.horizontal)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: UIScreen.main.bounds.height)
         }
         .sheet(isPresented: $isFilePickerPresented) {
             DocumentPicker(fileContent: $fileContent, fileName: $fileName)
