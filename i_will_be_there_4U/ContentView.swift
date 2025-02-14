@@ -17,83 +17,141 @@ struct ContentView: View {
     @State private var errorMessage: String? = nil
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text(fileName)
-                .font(.headline)
-                .padding(.top)
-            
-            HStack(spacing: 15) {
-                Button(action: {
-                    isFilePickerPresented = true
-                }) {
-                    HStack {
-                        Image(systemName: "doc.text")
-                        Text("Select .txt File")
+        ScrollView {
+            VStack(spacing: 24) {
+                Spacer()
+                // Header
+                VStack(spacing: 8) {
+                    Image(systemName: "heart")
+                        .resizable()
+                        .frame(width: 32, height: 32)
+                        .foregroundColor(.green)
+                    
+                    Text("Chat analyser")
+                        .font(.system(size: 32, weight: .bold))
+                    
+                    Text("Reads the bond and creates memory cards")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.top, 100)
+                
+                // Instructions
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("1. Export the chat from whatsapp.")
+                    Text("2. Select without attachment for better\n    processing.")
+                    Text("3. Convert the ZIP file to .txt file.")
+                    Text("4. Open Chat analyser & upload the\n    chat.txt here.")
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity)
+                .background(Color.green.opacity(0.1))
+                .cornerRadius(12)
+                .padding(.horizontal)
+                
+                // File Status and Upload
+                if !fileContent.isEmpty {
+                    VStack(spacing: 4) {
+                        HStack(spacing: 4) {
+                            Text(fileName)
+                                .font(.headline)
+                            Button(action: {
+                                isFilePickerPresented = true
+                            }) {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .foregroundColor(.green)
+                                    .font(.system(size: 16))
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        
+                        Text("Chat uploaded successfully!")
+                            .foregroundColor(.green)
+                            .font(.subheadline)
                     }
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .padding(.vertical, 8)
+                } else {
+                    Button(action: {
+                        isFilePickerPresented = true
+                    }) {
+                        HStack {
+                            Image(systemName: "square.and.arrow.up.fill")
+                            Text("Upload Chat")
+                        }
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                    }
+                    .background(Color.green)
+                    .cornerRadius(25)
                 }
                 
+                // Create Memory Button
                 if !fileContent.isEmpty {
                     Button(action: {
                         processWithGemini()
                     }) {
                         HStack {
                             Image(systemName: "wand.and.stars")
-                            Text("Process with Gemini")
+                            Text("Create Memory")
                         }
-                        .padding()
-                        .background(Color.green)
+                        .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
                     }
+                    .background(Color.green)
+                    .cornerRadius(25)
                     .disabled(isProcessing)
                 }
-            }
-
-            if !fileContent.isEmpty {
-                Text("File Content:")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
                 
-                ScrollView {
-                    TextEditor(text: .constant(fileContent))
-                        .frame(minHeight: 200)
+                // Processing Status
+                if isProcessing {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .padding()
+                        
+                        Text("Creating your memory...")
+                            .font(.headline)
+                            .foregroundColor(.green)
+                    }
+                    .padding(.vertical, 8)
+                }
+                
+                // Response Display
+                if !geminiResponse.isEmpty {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Your Memory Card")
+                            .font(.title2)
+                            .bold()
+                            .padding(.horizontal)
+                        
+                        Text(geminiResponse)
+                            .padding(20)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
+                    }
+                }
+                
+                if let error = errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
                         .padding()
-                        .background(Color(.systemGray6))
+                        .background(Color.red.opacity(0.1))
                         .cornerRadius(8)
                 }
-            }
-            
-            if isProcessing {
-                ProgressView("Processing with Gemini...")
-            }
-            
-            if !geminiResponse.isEmpty {
-                Text("Gemini Response:")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
                 
-                ScrollView {
-                    TextEditor(text: .constant(geminiResponse))
-                        .frame(minHeight: 200)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                }
+                Spacer(minLength: 40)
+                Spacer()
             }
-            
-            if let error = errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .padding()
-            }
+            .padding(.horizontal)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: UIScreen.main.bounds.height)
         }
-        .padding()
         .sheet(isPresented: $isFilePickerPresented) {
             DocumentPicker(fileContent: $fileContent, fileName: $fileName)
         }
